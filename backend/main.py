@@ -12,7 +12,6 @@ from ocr import extract_aadhaar_info
 
 app = FastAPI(title="City Assist API", version="1.0.0")
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,8 +20,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# ============= Pydantic Models =============
 
 class WorkerRegisterRequest(BaseModel):
     name: str
@@ -35,11 +32,6 @@ class WorkerRegisterRequest(BaseModel):
     past_employers: int = 0
     rating: float = 0.0
     
-    # Aadhaar verification (from OCR)
-    aadhaar_verified: bool = False
-    aadhaar_name: Optional[str] = None
-    aadhaar_dob: Optional[str] = None
-    aadhaar_number: Optional[str] = None
     aadhaar_address: Optional[str] = None
 
 
@@ -100,7 +92,6 @@ class HealthResponse(BaseModel):
     workers_in_db: int
 
 
-# ============= Utility Functions =============
 
 def worker_to_response(worker: Worker, trust_score: Optional[int] = None) -> WorkerResponse:
     """Convert Worker DB object to API response"""
@@ -135,8 +126,6 @@ def worker_to_response(worker: Worker, trust_score: Optional[int] = None) -> Wor
     )
 
 
-# ============= Health Check =============
-
 @app.get("/api/health", response_model=HealthResponse)
 async def health_check(db: Session = Depends(get_db)):
     """Health check endpoint"""
@@ -147,21 +136,14 @@ async def health_check(db: Session = Depends(get_db)):
     )
 
 
-# ============= Worker Registration =============
-
 @app.post("/api/workers", response_model=dict)
 async def register_worker(worker_data: WorkerRegisterRequest, db: Session = Depends(get_db)):
-    """Register a new worker with computed trust score and embedding"""
-    
-    # Compute embedding for the worker
     worker_dict = worker_data.dict()
     embedding = compute_worker_embedding(worker_dict)
     worker_dict['embedding'] = embedding
     
-    # Compute trust score
     trust_score = compute_trust_score(worker_dict)
     
-    # Create worker in DB
     db_worker = create_worker(db, worker_dict)
     
     return {
@@ -171,8 +153,6 @@ async def register_worker(worker_data: WorkerRegisterRequest, db: Session = Depe
         "message": f"Worker '{db_worker.name}' registered successfully",
     }
 
-
-# ============= Retrieve Workers =============
 
 @app.get("/api/workers", response_model=List[WorkerResponse])
 async def list_workers(db: Session = Depends(get_db)):
@@ -194,8 +174,6 @@ async def list_workers(db: Session = Depends(get_db)):
     return results
 
 
-# ============= Delete Worker =============
-
 @app.delete("/api/workers/{worker_id}")
 async def delete_worker_endpoint(worker_id: int, db: Session = Depends(get_db)):
     """Delete a worker by ID"""
@@ -207,16 +185,9 @@ async def delete_worker_endpoint(worker_id: int, db: Session = Depends(get_db)):
     return {"message": f"Worker {worker_id} deleted successfully"}
 
 
-# ============= OCR Aadhaar =============
-
 @app.post("/api/ocr/aadhaar", response_model=OCRResponse)
 async def ocr_aadhaar(file: UploadFile = File(...)):
-    """Upload Aadhaar image and extract information via OCR"""
-    
-    # Read file
     image_data = await file.read()
-    
-    # Run OCR
     result = extract_aadhaar_info(image_data)
     
     return OCRResponse(
@@ -228,37 +199,22 @@ async def ocr_aadhaar(file: UploadFile = File(...)):
     )
 
 
-# ============= Search =============
-
 @app.post("/api/search", response_model=List[SearchResult])
 async def search_workers(search_req: SearchRequest, db: Session = Depends(get_db)):
-    """
-    Search workers using semantic vector similarity.
-    
-    Ranking formula:
-    final_score = 0.85 * similarity_score + 0.15 * (trust_score / 100)
-    """
-    
-    # Get all workers
     workers = get_all_workers(db)
     
     if not workers:
         return []
     
-    # Encode the search query
     query_embedding = encode_text(search_req.query)
-    
     results = []
     
     for worker in workers:
-        # Get worker's embedding
         if not worker.embedding:
             continue
         
-        # Compute cosine similarity
         similarity = cosine_similarity(query_embedding, worker.embedding)
         
-        # Compute trust score
         trust_score = compute_trust_score({
             'aadhaar_verified': worker.aadhaar_verified,
             'police_verified': worker.police_verified,
@@ -268,10 +224,7 @@ async def search_workers(search_req: SearchRequest, db: Session = Depends(get_db
             'rating': worker.rating,
         })
         
-        # Combine scores
-        # Normalize similarity from [-1, 1] to [0, 1] (though usually in [0, 1])
         normalized_similarity = (similarity + 1) / 2 if similarity < 0 else similarity
-        
         final_score = 0.85 * normalized_similarity + 0.15 * (trust_score / 100.0)
         
         result = SearchResult(
@@ -295,10 +248,7 @@ async def search_workers(search_req: SearchRequest, db: Session = Depends(get_db
         )
         results.append((result, final_score))
     
-    # Sort by final_score descending
     results.sort(key=lambda x: x[1], reverse=True)
-    
-    # Return only the result objects (without the score)
     return [r[0] for r in results]
 
 

@@ -1,15 +1,13 @@
 export function TrustRing({ score, label = "Trust Score" }) {
-  // Determine color based on score
   let color;
   if (score >= 80) {
-    color = '#22c55e'; // green
+    color = '#22c55e';
   } else if (score >= 60) {
-    color = '#f59e0b'; // amber
+    color = '#f59e0b';
   } else {
-    color = '#ef4444'; // red
+    color = '#ef4444';
   }
 
-  // SVG circle parameters
   const size = 80;
   const radius = 30;
   const circumference = 2 * Math.PI * radius;
@@ -18,7 +16,6 @@ export function TrustRing({ score, label = "Trust Score" }) {
   return (
     <div className="trust-ring-container">
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        {/* Background circle */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -27,7 +24,6 @@ export function TrustRing({ score, label = "Trust Score" }) {
           stroke="#e5e7eb"
           strokeWidth="4"
         />
-        {/* Progress circle */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -41,7 +37,6 @@ export function TrustRing({ score, label = "Trust Score" }) {
           style={{ transition: 'stroke-dashoffset 0.3s ease' }}
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
-        {/* Score text */}
         <text
           x={size / 2}
           y={size / 2}

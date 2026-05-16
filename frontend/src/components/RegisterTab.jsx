@@ -87,7 +87,7 @@ export function RegisterTab() {
       const response = await axios.post(`${API_BASE}/workers`, formData);
       setSuccess(`✓ Worker "${formData.name}" registered successfully with Trust Score: ${response.data.trust_score}`);
 
-      // Reset form
+
       setFormData({
         name: '',
         role: 'Cook',
@@ -228,7 +228,6 @@ export function RegisterTab() {
             <label htmlFor="police_verified">Police Verified</label>
           </div>
 
-          {/* Aadhaar Upload */}
           <div className="aadhaar-upload">
             <h3>Upload Aadhaar Card</h3>
             <p style={{ marginBottom: '16px', color: '#6b7280', fontSize: '14px' }}>

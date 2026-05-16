@@ -22,26 +22,23 @@ class Worker(Base):
     role = Column(String, index=True)
     location = Column(String, index=True)
     experience = Column(Integer, default=0)
-    skills = Column(String, default="")  # comma-separated
+    skills = Column(String, default="")
     police_verified = Column(Boolean, default=False)
     past_employers = Column(Integer, default=0)
     rating = Column(Float, default=0.0)
     
-    # Aadhaar verification
     aadhaar_verified = Column(Boolean, default=False)
     aadhaar_name = Column(String, nullable=True)
-    aadhaar_dob = Column(String, nullable=True)  # DD/MM/YYYY
+    aadhaar_dob = Column(String, nullable=True)
     aadhaar_number = Column(String, nullable=True)
     aadhaar_address = Column(String, nullable=True)
     
-    # Bio and embedding
     bio = Column(Text, default="")
-    embedding = Column(JSON)  # Array of 384 floats
+    embedding = Column(JSON)
     
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
-# Create tables
 Base.metadata.create_all(bind=engine)
 
 
@@ -54,17 +51,14 @@ def get_db():
 
 
 def get_all_workers(db):
-    """Get all workers from database"""
     return db.query(Worker).all()
 
 
 def get_worker_by_id(db, worker_id: int):
-    """Get worker by ID"""
     return db.query(Worker).filter(Worker.id == worker_id).first()
 
 
 def create_worker(db, worker_data: dict):
-    """Create a new worker"""
     db_worker = Worker(**worker_data)
     db.add(db_worker)
     db.commit()
@@ -73,7 +67,6 @@ def create_worker(db, worker_data: dict):
 
 
 def delete_worker(db, worker_id: int):
-    """Delete a worker"""
     worker = db.query(Worker).filter(Worker.id == worker_id).first()
     if worker:
         db.delete(worker)
@@ -83,7 +76,6 @@ def delete_worker(db, worker_id: int):
 
 
 def update_worker(db, worker_id: int, update_data: dict):
-    """Update worker data"""
     worker = db.query(Worker).filter(Worker.id == worker_id).first()
     if worker:
         for key, value in update_data.items():
