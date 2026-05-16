@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+sentence-transformers
+paddleocr
+paddlepaddle
+numpy
+pillow
+python-multipart
+sqlalchemy
+pydantic
