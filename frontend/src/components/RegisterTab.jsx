@@ -86,7 +86,7 @@ export function RegisterTab() {
     try {
       const response = await axios.post(`${API_BASE}/workers`, formData);
       setSuccess(`✓ Worker "${formData.name}" registered successfully with Trust Score: ${response.data.trust_score}`);
-      
+
       // Reset form
       setFormData({
         name: '',
@@ -118,7 +118,7 @@ export function RegisterTab() {
     <div className="content active">
       <div className="register-container">
         <h2>Register New Worker</h2>
-        
+
         {error && <div className="error-message">{error}</div>}
         {success && <div className="success-message">{success}</div>}
 

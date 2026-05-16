@@ -39,10 +39,10 @@ export function WorkersTab() {
 
   const getSortedWorkers = () => {
     let sorted = [...workers];
-    
+
     sorted.sort((a, b) => {
       let aVal, bVal;
-      
+
       if (sortBy === 'trust_score') {
         aVal = a.trust_score;
         bVal = b.trust_score;
@@ -56,18 +56,18 @@ export function WorkersTab() {
         aVal = a[sortBy];
         bVal = b[sortBy];
       }
-      
+
       if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
       if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
       return 0;
     });
-    
+
     return sorted;
   };
 
   const handleDelete = async (workerId) => {
     if (!confirm('Are you sure you want to delete this worker?')) return;
-    
+
     try {
       await axios.delete(`${API_BASE}/workers/${workerId}`);
       setWorkers(workers.filter(w => w.id !== workerId));
@@ -141,10 +141,10 @@ export function WorkersTab() {
             </thead>
             <tbody>
               {sortedWorkers.map((worker) => {
-                const statusLabel = worker.aadhaar_verified ? '✓ Verified' : 
-                                   worker.police_verified ? '✓ Police' : 
-                                   '⚠ Unverified';
-                
+                const statusLabel = worker.aadhaar_verified ? '✓ Verified' :
+                  worker.police_verified ? '✓ Police' :
+                    '⚠ Unverified';
+
                 return (
                   <tr key={worker.id}>
                     <td><strong>{worker.name}</strong></td>
@@ -154,9 +154,9 @@ export function WorkersTab() {
                     <td>★ {worker.rating.toFixed(1)}</td>
                     <td>
                       <strong style={{
-                        color: worker.trust_score >= 80 ? '#22c55e' : 
-                               worker.trust_score >= 60 ? '#f59e0b' : 
-                               '#ef4444'
+                        color: worker.trust_score >= 80 ? '#22c55e' :
+                          worker.trust_score >= 60 ? '#f59e0b' :
+                            '#ef4444'
                       }}>
                         {worker.trust_score}
                       </strong>

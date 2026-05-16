@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+cityassist.db
+.env
+.git/
+.gitignore
